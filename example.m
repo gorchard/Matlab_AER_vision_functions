@@ -3,7 +3,7 @@
 
 %% read in data
 % if data file is already in matlab format (.mat) then use
-filename = 'example_data.mat'; % this file contains 5 seconds of both Exposure Measurement and Temporal Difference data
+filename = 'example_data.mat'; % this file contains 3 seconds of both Exposure Measurement and Temporal Difference data
 load(filename);
 
 % if using N-MNIST or N-Caltech101, then instead use the Read_Ndataset function supplied with each dataset. 
@@ -45,17 +45,18 @@ TD_filtered = FilterTD(TD, 5e3);
 % view the result
 ShowTD(TD_filtered);
 
-% Show the data in a 3D space-time plot, the path of the pedestrian and
-% cyclist should be clearly visible
+% Show the data in a 3D space-time plot, the path of the bird and
+% car should be clearly visible
 Show3D(TD_filtered);
 
-% Remove any events with x location greater than 100
-null_event_indices = TD_filtered.x>100;
+% Remove any events with y location greater than 120 (i.e. keep only the top
+% half of the scene)
+null_event_indices = TD_filtered.y>120;
 TD_cropped = RemoveNulls(TD_filtered, null_event_indices);
 
-% Extract a 100x100 pixel region with top left at location 30, 140, and only
-% events occurring between 2.5 and 3.5 seconds
-TD_ROI = ExtractROI(TD_cropped, [30,140], [100, 100], [2.5e6, 3.5e6]);
+% Extract a 50x50 pixel box with top left at location [250, 1], and only
+% events occurring between 1 and 2 seconds
+TD_ROI = ExtractROI(TD_cropped, [250,1], [50, 50], [1e6, 2e6]);
 
 %Show the result 10x slowed down and make it into a movie
 video = ShowTD(TD_ROI, 1/(24*10)); %a regular video would have 1/24 seconds worth of data per frame. We want 1/24 * 1/10 seconds of data per frame
