@@ -1,10 +1,38 @@
-% ROI_TD = ExtractROI(TD, [x,y], [xsize, ysize], [tmin, tmax])
-% extracts a spatial Region Of Interest (ROI) defined by [x,y], [xsize, ysize]
-% and a temporal region of interest defined by [tmin, tmax] where
-% [x,y] is the location of the top left corner of the ROI, and
-% [xsize, ysize] is the size of the region
-% [tmin, tmax] are the start and end times of the temporal region
 function [ROIevts] = ExtractROI(varargin)
+% ROI_TD = ExtractROI(TD, [x,y], [x_size, y_size], [t_min, t_max])
+%   Extracts a spatio-temporal Region Of Interest (ROI) from the events TD
+% 
+% TAKES IN:  
+% 'TD' 
+%       The events from which the ROI is to be extracted. TD is a struct
+%       with format:
+%           TD.x =  pixel X locations
+%           TD.y =  pixel Y locations
+%           TD.p =  event polarity (not used by this function)
+%           TD.ts = event timestamps, typically in microseconds 
+% 
+% '[x,y]'   
+%       The top left corner of the spatial ROI in pixels. Leave empty
+%       if only a temporal ROI is required.
+% 
+% '[x_size, y_size]'
+%        The spatial size of the ROI in pixels. Leave empty if only a
+%        temporal ROI is required.
+% 
+% '[t_min, t_max]' 
+%       The start and end times of the temporal region of interest in the
+%       same units as the timestamps of the events (typically microseconds)
+% 
+% 
+% RETURNS:
+% 'ROIevts'
+%       A struct of the same format as 'TD', but only containing events
+%       which occur within the stated ROI
+% 
+% 
+% written by Garrick Orchard - June 2014
+% garrickorchard@gmail.com
+
 ROIevts = varargin{1};
 invalidIndices = zeros(size(ROIevts.x));
 
