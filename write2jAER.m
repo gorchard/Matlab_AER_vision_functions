@@ -24,22 +24,34 @@ function write2jAER(TD, filename)
 % garrickorchard@gmail.com
 
 TDlength = length(TD.ts);
-TD = ExtractROI(TD, [1,1], [128,128]);
+TD = ExtractROI(TD, [1,1], [640,480]);
 if length(TD.ts) ~= TDlength
-    warning('jAER can only accept 128x128 pixel resolution, pixel addresses above 128x128 have been removed');
+    warning('jAER can only accept 640x480 pixel resolution, pixel addresses above 640x480 have been removed');
 end
 
-xshift=1; % bits to shift x to right
-yshift=8; % bits to shift y to right
+% type = zeros(size(TD.ts));
+% type_shift = 31;
 
-xfinal=bitshift(128-TD.x,xshift);
-yfinal=bitshift(128-TD.y,yshift);
+y = 480-TD.y;
+y_shift = 22;
 
-temp = unique(TD.p);
-polfinal=ones(size(TD.p));
-polfinal(TD.p == temp(1)) = 0;
+x = 640-TD.x;
+x_shift = 12;
 
-vector_allAddr=uint32(yfinal+xfinal+polfinal);
+p = TD.p;
+p_shift = 11;
+
+% trigger = zeros(size(TD.ts));
+% trigger_shift = 10;
+
+% ADC = zeros(size(TD.ts));
+% ADC_shift = 0;
+
+y_final=bitshift(y,y_shift); 
+x_final=bitshift(x,x_shift); 
+p_final=bitshift(p,p_shift); 
+
+vector_allAddr=uint32(y_final+x_final+p_final);
 vector_allTs=uint32(TD.ts);
 
 aedat_file=fopen(filename,'w');
@@ -51,6 +63,7 @@ fprintf(aedat_file,'%s\r\n','# This is a raw AE data file - do not edit');
 fprintf(aedat_file,'%s\r\n','# Data format is int32 address, int32 timestamp (8 bytes total), repeated for each event');
 fprintf(aedat_file,'%s\r\n','# Timestamps tick is 1 us');
 fprintf(aedat_file,'%s\r\n', ['# created ', datestr(now), ' by the Matlab function "write2jAER"']);
+fprintf(aedat_file,'%s\r\n','# This function fakes the format of DAVIS640 to allow for the full ATIS address space to be used (304x240)');
 
 bof=ftell(aedat_file);
 fseek(aedat_file,bof-4,'bof'); % start just after header
