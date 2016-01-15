@@ -1,18 +1,42 @@
-% vid = ShowTDEM(TD, EM, TPF, [Tstart, Tstop])
-%
-% This function displays EM grayscale with TD data superimposed, optional
-% arguments TPF, [Tstart, Tstop]
+% vid = ShowTDEM(TD, EM, TPF, time_span)
+%   displays Exposure Measurement (EM, grayscale) video with Temporal
+%   Difference (TD, change detection) events superimposed.
 % 
-% vid - A video object returned by the function
-%
-% TS  - The Temporal Difference (TD) events to be shown
+% TAKES IN:
+%   'TD'     
+%       A struct of events with format
+%           TD.x =  pixel X locations, strictly positive integers only (TD.x>0)
+%           TD.y =  pixel Y locations, strictly positive integers only (TD.y>0)
+%           TD.p =  event polarity. TD.p = 0 for OFF events, TD.p = 1 for ON
+%                   events
+%           TD.ts = event timestamps in units of microseconds
 % 
-% EM  - The Exposure Measurement (EM) events to be shown
+%   'EM'
+%       A struct of Exposure Measurement (EM) events in the format
+%           EM.x =  pixel X locations, strictly positive integers only (TD.x>0)
+%           EM.y =  pixel Y locations, strictly positive integers only (TD.y>0)
+%           EM.p =  event polarity. EM.p = 0 for first threshold, EM.p = 1 for 
+%               second threshold.
+%           EM.ts = event timestamps in units of microseconds
+% 
+%   'TPF' 
+%       The Time Per Frame (TPF) indicates how much to advance time by per
+%       frame (This argument is optional and defaults to 1/24 seconds).
 %
-% TPF - The Time Per Frame (TPF) indicates how much to advance time by per frame (default is 1/24 seconds)
+%   'time_span' = [Tstart,Tstop]
+%       An optional argument to specify the timepoints in the recording at
+%       which playback should begin and end. A value of '-1' for Tstart
+%       indicates to start at the beginning. A value of '-1' for Tstop
+%       indicates to continue until the end of the recording.
+% 
+% RETURNS:
+%   'vid' 
+%       A Matlab video of the recording. The video can be saved to file by
+%       using the function 'SaveMovie'.
 %
-% [Tstart,Tstop] - Optional start and stop time. [-1,-1] means start at the
-% beginning and play to the end of the recording
+% 
+% written by Garrick Orchard - June 2014
+% garrickorchard@gmail.com
 
 function vid = ShowTDEM(varargin)
 close all
