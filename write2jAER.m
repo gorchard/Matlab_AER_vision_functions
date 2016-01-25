@@ -1,12 +1,14 @@
 function write2jAER(TD, filename)
 % function write2jAER(TD, filename) 
-%   Saves events in a format which can be read by jAER (http://sourceforge.net/p/jaer/wiki/Home/)
+%   Saves events in a format which can be read by jAER
+%   (http://sourceforge.net/p/jaer/wiki/Home/) 
+%   To view in jAER, select the DAVIS640 as the sensor.
 % 
 % TAKES IN:
 % 'TD' 
 %       A struct of Temporal Difference (TD) events with format:
-%           TD.x =  pixel X locations
-%           TD.y =  pixel Y locations
+%           TD.x =  pixel X locations, stricly positive
+%           TD.y =  pixel Y locations, stricly positive
 %           TD.p =  event polarity
 %           TD.ts = event timestamps in microseconds 
 %
@@ -18,15 +20,38 @@ function write2jAER(TD, filename)
 % 
 % Adapted from the function "mat2dat", available from http://www2.imse-cnm.csic.es/caviar/MNIST_DVS/
 % 
-% Can only write a 128x128 pixel region for now
+% Can only write a 640x480 pixel region for now
 % 
 % Garrick Orchard - June 2014
 % garrickorchard@gmail.com
 
+%check that pixel addresses are strictly positive
+if (min(TD.y)<1) || (min(TD.x)<1) 
+    error('x and y addresses must be strictly positive. Zero and negative values are not allowed.');
+end
+
+%check the resolution
 TDlength = length(TD.ts);
 TD = ExtractROI(TD, [1,1], [640,480]);
 if length(TD.ts) ~= TDlength
     warning('jAER can only accept 640x480 pixel resolution, pixel addresses above 640x480 have been removed');
+end
+
+%check that polarities are 0 and +1 (not -1 and +1)
+values = unique(TD.p);
+if values(1) == -1
+    TD.p(TD.p == -1) = 0;
+end
+
+%check that the filename ends in .aedat
+if length(filename)<7
+    warning('filename must be of extension .aedat. The extension has been appended to the filename');
+    filename = [filename, '.aedat'];
+end
+
+if ~strcmp(filename((end-5):end), '.aedat')
+    warning('filename must be of extension .aedat. The extension has been appended to the filename');
+    filename = [filename, '.aedat'];
 end
 
 % type = zeros(size(TD.ts));

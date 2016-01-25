@@ -51,6 +51,13 @@ end
 
 if nargin > 3
     ROItime = varargin{4};
+    if ROItime(1) == -1
+        ROItime(1) = -inf;
+    end
+    if ROItime(2) == -1
+        ROItime(2) = inf;
+    end
+    
     invalidIndices = invalidIndices | (ROIevts.ts<ROItime(1)) | (ROIevts.ts>ROItime(2));
 end
 

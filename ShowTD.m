@@ -1,25 +1,50 @@
-% ShowTD replays temporal difference events and returns a video object
-% vid = ShowTD(TD, TPF, FL, [Tstart,Tstop], Scale)
-% all arguments except TD are optional
-%
-% vid - A video object returned by the function
-%
-% TD  - The Temporal Difference (TD) events to be shown
-%
-% TPF - The Time Per Frame (TPF) indicates how much to advance time by per frame (default is 1/24 seconds)
-%
-% FL  - The Frame Length (FL) is the amount of data (measured in time) to show in each frame as a
-% percentage of TPF. Default is 1
-%
-% [Tstart,Tstop] - Optional start and stop time
-
 function vid = ShowTD(varargin)
+% vid = ShowTD(TD, TPF, FL, time_span, Scale)
+%   Shows a video of Temporal Difference (TD) events and returns a video
+%   object which can be saved to AVI using the 'SaveMovie' function.  
+%   All arguments except TD are optional.
+%
+% TAKES IN:
+%   'TD'
+%       A struct of TD events with format:
+%           TD.x =  pixel X locations
+%           TD.y =  pixel Y locations
+%           TD.p =  event polarity
+%           TD.ts = event timestamps in microseconds
+% 
+%   'TPF'
+%       Time Per Frame (TPF) is an optional argument specifying the
+%       time-spacing between the start of subsequent frames (basically the
+%       frame rate for the video). Defaults to 24FPS, which is a Time Per
+%       Frame (TPF) of 1/24 seconds. 
+% 
+%   'FL'
+%       Frame Length (FL) is an optional arguments specifying the time-span
+%       of data to show per frame as a fraction of TPF. Defaults to TPF seconds. If FL<1,
+%       then not all data in a sequence will be shown. If FL>1 then some
+%       data will be repeated in subsequent frames.
+% 
+%   'time_span' = [Tstart,Tstop]
+%       An optional argument specifying at which point in time the playback
+%       should start (Tstart) and stop (Tstop). If time_span is not
+%       specified, the entire recording will be shown by default.
+% 
+% 
+% RETURNS:
+%    'vid' 
+%       A video object which can be saved to AVI using the 'SaveMovie'
+%       function.
+%
+% 
+% written by Garrick Orchard - June 2014
+% garrickorchard@gmail.com
+
 close all
 s = warning('off','images:imshow:magnificationMustBeFitForDockedFigure');
 timeconst = 1e-6;
 TD = varargin{1};
 
-TD.p = TD.p - min(TD.p) + 1;
+TD.p = round(TD.p - min(TD.p) + 1);
 
 %FPS is 1/TPF
 if nargin > 1

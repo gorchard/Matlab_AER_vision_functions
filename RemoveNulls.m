@@ -38,6 +38,7 @@
 % garrickorchard@gmail.com
 
 function result =  RemoveNulls(result, indices)
+indices = logical(indices);
 fieldnames = fields(result);
 for i = 1:length(fieldnames)
     result.(fieldnames{i})(indices)  = [];
