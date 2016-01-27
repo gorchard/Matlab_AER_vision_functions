@@ -1,3 +1,4 @@
+function result =  RemoveNulls(result, indices)
 % TDout =  RemoveNulls(TD, Null_indices)
 % removes all events at the logical indices 'Null_indices'
 % 
@@ -37,7 +38,7 @@
 % written by Garrick Orchard - June 2014
 % garrickorchard@gmail.com
 
-function result =  RemoveNulls(result, indices)
+
 indices = logical(indices);
 fieldnames = fields(result);
 for i = 1:length(fieldnames)
