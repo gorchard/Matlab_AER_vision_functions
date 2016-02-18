@@ -59,12 +59,15 @@ end
 
 y = 480-TD.y;
 y_shift = 22;
+y_size = 9;
 
 x = 640-TD.x;
 x_shift = 12;
+x_size = 10;
 
 p = TD.p;
 p_shift = 11;
+p_size = 1;
 
 % trigger = zeros(size(TD.ts));
 % trigger_shift = 10;
@@ -86,8 +89,12 @@ fprintf(aedat_file,'%s','#!AER-DAT');
 fprintf(aedat_file,'%1.1f\r\n', version);
 fprintf(aedat_file,'%s\r\n','# This is a raw AE data file - do not edit');
 fprintf(aedat_file,'%s\r\n','# Data format is int32 address, int32 timestamp (8 bytes total), repeated for each event');
+fprintf(aedat_file,'%s\r\n',['# x: ', num2str(x_size), ' bits, ', num2str(x_shift), 'bits offset']);
+fprintf(aedat_file,'%s\r\n',['# y: ', num2str(y_size), ' bits, ', num2str(y_shift), 'bits offset']);
+fprintf(aedat_file,'%s\r\n',['# p: ', num2str(p_size), ' bits, ', num2str(p_shift), 'bits offset']);
 fprintf(aedat_file,'%s\r\n','# Timestamps tick is 1 us');
-fprintf(aedat_file,'%s\r\n', ['# created ', datestr(now), ' by the Matlab function "write2jAER"']);
+fprintf(aedat_file,'%s\r\n', ['# created ', datestr(now, 'ddd mmm dd HH:MM:SS yyyy')]);
+fprintf(aedat_file,'%s\r\n', '# by the Matlab function "write2jAER" from www.garrickorchard.com/code');
 fprintf(aedat_file,'%s\r\n','# This function fakes the format of DAVIS640 to allow for the full ATIS address space to be used (304x240)');
 
 bof=ftell(aedat_file);
