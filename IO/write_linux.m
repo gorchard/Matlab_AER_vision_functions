@@ -37,19 +37,11 @@ fprintf(output_file, '#Event file for linux_aer created using Matlab function "w
 
 num_overflows = floor(TD.ts(end)/(2^16));
 
-TD_temp_ts = TD.ts;
-overflow_indices = zeros(1, num_overflows);
-for i = 1:num_overflows
-    overflow_indices(i) = find(TD_temp_ts >= 2^16, 1);
-    TD_temp_ts(overflow_indices(i):end) = TD_temp_ts(overflow_indices(i):end) - 2^16;
-end
-clear TD_temp_ts
-
 overflow_events.x       = zeros(1,num_overflows);
 overflow_events.y       = zeros(1,num_overflows);
 overflow_events.type    = 2*ones(1,num_overflows);
 overflow_events.subtype = zeros(1,num_overflows);
-overflow_events.ts      = TD.ts(overflow_indices)-0.5;
+overflow_events.ts      = (1:num_overflows)*(2^16)-0.5;
 
 write_events.x = TD.x-1;
 write_events.y = TD.y-1;
