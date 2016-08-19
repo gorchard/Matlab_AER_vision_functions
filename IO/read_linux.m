@@ -57,12 +57,12 @@ end
 raw_data_buffer = fread(videoData);
 %initialize TD struct
 total_events = length(raw_data_buffer);
-TD.x = zeros(1,total_events);
-TD.y = zeros(1,total_events);
-TD.p = zeros(1,total_events);
-TD.ts = zeros(1,total_events);
-TD.f = zeros(1,total_events);
-TD_indices = logical(zeros(1,total_events));
+TD.x = zeros(1,total_events, 'uint16');
+TD.y = zeros(1,total_events, 'uint16');
+TD.p = zeros(1,total_events, 'uint8');
+TD.ts = zeros(1,total_events, 'uint32');
+TD.f = zeros(1,total_events, 'uint8');
+TD_indices = logical(zeros(1,total_events, 'uint8'));
 %fseek(videoData, start_offset, 'bof');
 
 %packet_num = 1;
@@ -90,11 +90,11 @@ while buffer_location < length(raw_data_buffer)
     end
          
     TD_indices(total_events:(total_events+num_events-1)) = (type == 0 | type == 3);
-    TD.x(total_events:(total_events+num_events-1)) = x;
-    TD.y(total_events:(total_events+num_events-1)) = y;
-    TD.p(total_events:(total_events+num_events-1)) = subtype;
-    TD.ts(total_events:(total_events+num_events-1)) = ts;
-    TD.f(total_events:(total_events+num_events-1)) = type;
+    TD.x(total_events:(total_events+num_events-1)) = uint16(x);
+    TD.y(total_events:(total_events+num_events-1)) = uint16(y);
+    TD.p(total_events:(total_events+num_events-1)) = uint8(subtype);
+    TD.ts(total_events:(total_events+num_events-1)) = uint32(ts);
+    TD.f(total_events:(total_events+num_events-1)) = uint8(type);
     total_events = total_events + num_events;
 end
 

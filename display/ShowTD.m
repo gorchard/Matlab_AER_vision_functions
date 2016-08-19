@@ -100,7 +100,7 @@ ImageBack = zeros(max(TD.y),max(TD.x),3);
 
 axis image
 i = Tmin;
-cc = hsv(max(TD.p));
+cc = hsv(double(max(TD.p)));
 Image = ImageBack;
 k=1;
 nFrames = ceil((TD.ts(Tmax)-TD.ts(Tmin))/FrameLength);

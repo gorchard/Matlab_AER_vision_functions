@@ -1,5 +1,5 @@
-function SaveAER(TD, EM, filename)
-% SaveAER(TD, EM, filename)
+function writeAER(TD, EM, filename)
+% writeAER(TD, EM, filename)
 %   Saves events in the ".val" file formate used by the ATIS Windows GUI v4.2 onwards
 %
 % TAKES IN:
