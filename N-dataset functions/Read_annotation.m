@@ -19,3 +19,5 @@ rows = fread(FID, 1, 'int16');
 cols = fread(FID, 1, 'int16');
 obj_contour = fread(FID, rows*cols, 'int16');
 obj_contour = reshape(obj_contour, [rows, cols]);
+
+fclose(FID);
