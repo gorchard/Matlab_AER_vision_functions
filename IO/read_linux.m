@@ -54,24 +54,15 @@ end
 %         total_events = total_events + num_events;
 %     end
 % end
-raw_data_buffer = fread(videoData);
+raw_data_buffer = uint8(fread(videoData));
 %initialize TD struct
 total_events = length(raw_data_buffer);
-<<<<<<< HEAD:IO/read_linux.m
-TD.x = zeros(1,total_events, 'uint16');
-TD.y = zeros(1,total_events, 'uint16');
-TD.p = zeros(1,total_events, 'uint8');
-TD.ts = zeros(1,total_events, 'uint32');
-TD.f = zeros(1,total_events, 'uint8');
-TD_indices = logical(zeros(1,total_events, 'uint8'));
-=======
-TDtemp.x = zeros(1,total_events);
-TDtemp.y = zeros(1,total_events);
-TDtemp.p = zeros(1,total_events);
-TDtemp.ts = zeros(1,total_events);
-TDtemp.type = inf*ones(1,total_events);
+TDtemp.x = zeros(1,total_events, 'uint16');
+TDtemp.y = zeros(1,total_events, 'uint16');
+TDtemp.p = zeros(1,total_events, 'uint8');
+TDtemp.ts = zeros(1,total_events, 'uint32');
+TDtemp.type = inf*ones(1,total_events, 'uint8');
 %TD_indices = logical(zeros(1,total_events));
->>>>>>> 18e3cd938f66fdd4b4031c0b865bd5f0a4aadc2c:read_linux.m
 %fseek(videoData, start_offset, 'bof');
 
 %packet_num = 1;
@@ -79,16 +70,16 @@ TDtemp.type = inf*ones(1,total_events);
 total_events = 1;
 buffer_location = 1;
 while buffer_location < length(raw_data_buffer)
-    num_events = bitshift(raw_data_buffer(buffer_location+3), 24) + bitshift(raw_data_buffer(buffer_location+2), 16) + bitshift(raw_data_buffer(buffer_location+1), 8) + raw_data_buffer(buffer_location);
+    num_events = bitshift(uint32(raw_data_buffer(buffer_location+3)), 24) + bitshift(uint32(raw_data_buffer(buffer_location+2)), 16) + bitshift(uint32(raw_data_buffer(buffer_location+1)), 8) + uint32(raw_data_buffer(buffer_location));
     buffer_location = buffer_location +4;
-    start_time = bitshift(raw_data_buffer(buffer_location+3), 24) + bitshift(raw_data_buffer(buffer_location+2), 16) + bitshift(raw_data_buffer(buffer_location+1), 8) + raw_data_buffer(buffer_location);
+    start_time = bitshift(uint32(raw_data_buffer(buffer_location+3)), 24) + bitshift(uint32(raw_data_buffer(buffer_location+2)), 16) + bitshift(uint32(raw_data_buffer(buffer_location+1)), 8) + uint32(raw_data_buffer(buffer_location));
     buffer_location = buffer_location + 8; %skip the end_time
     
     type = raw_data_buffer(buffer_location:8:(buffer_location+8*(num_events-1)));
     subtype = raw_data_buffer((buffer_location+1):8:(buffer_location+8*(num_events)));
     y = raw_data_buffer((buffer_location+2):8:(buffer_location+8*(num_events)+1));
-    x = bitshift(raw_data_buffer((buffer_location+5):8:(buffer_location+8*(num_events)+4)), 8) + raw_data_buffer((buffer_location+4):8:(buffer_location+8*(num_events)+3));
-    ts = bitshift(raw_data_buffer((buffer_location+7):8:(buffer_location+8*(num_events)+6)), 8) + raw_data_buffer((buffer_location+6):8:(buffer_location+8*(num_events)+5));
+    x = bitshift(uint16(raw_data_buffer((buffer_location+5):8:(buffer_location+8*(num_events)+4))), 8) + uint16(raw_data_buffer((buffer_location+4):8:(buffer_location+8*(num_events)+3)));
+    ts = bitshift(uint32(raw_data_buffer((buffer_location+7):8:(buffer_location+8*(num_events)+6))), 8) + uint32(raw_data_buffer((buffer_location+6):8:(buffer_location+8*(num_events)+5)));
     
     buffer_location = buffer_location + num_events*8;
     ts = ts + start_time;
@@ -98,34 +89,38 @@ while buffer_location < length(raw_data_buffer)
         ts(overflows(i):end) = ts(overflows(i):end) + 65536;
     end
          
-<<<<<<< HEAD:IO/read_linux.m
-    TD_indices(total_events:(total_events+num_events-1)) = (type == 0 | type == 3);
-    TD.x(total_events:(total_events+num_events-1)) = uint16(x);
-    TD.y(total_events:(total_events+num_events-1)) = uint16(y);
-    TD.p(total_events:(total_events+num_events-1)) = uint8(subtype);
-    TD.ts(total_events:(total_events+num_events-1)) = uint32(ts);
-    TD.f(total_events:(total_events+num_events-1)) = uint8(type);
-=======
     TDtemp.type(total_events:(total_events+num_events-1)) = type;
     TDtemp.x(total_events:(total_events+num_events-1)) = x;
     TDtemp.y(total_events:(total_events+num_events-1)) = y;
     TDtemp.p(total_events:(total_events+num_events-1)) = subtype;
     TDtemp.ts(total_events:(total_events+num_events-1)) = ts;
     %TDtemp.f(total_events:(total_events+num_events-1)) = type;
->>>>>>> 18e3cd938f66fdd4b4031c0b865bd5f0a4aadc2c:read_linux.m
     total_events = total_events + num_events;
 end
+ 
+clear raw_data_buffer type x y subtype ts
 
 fclose(videoData);
 
 TDtemp = RemoveNulls(TDtemp, isinf(TDtemp.type));
-TD = RemoveNulls(TDtemp, (TDtemp.type ~= 0) & (TDtemp.type ~=3));
-EM = RemoveNulls(TDtemp, (TDtemp.type ~= 1));
-others = RemoveNulls(TDtemp, (TDtemp.type < 4));
 
+TD = RemoveNulls(TDtemp, (TDtemp.type ~= 0) & (TDtemp.type ~=3));
 TD.x = TD.x+1;
 TD.y = TD.y+1;
 TD.p = TD.p+1;
 
+% memory optimization
+TDtemp = RemoveNulls(TDtemp, (TDtemp.type ~= 0) & (TDtemp.type ==3));
+
+% memory optimization
+EM = RemoveNulls(TDtemp, (TDtemp.type ~= 1));
 EM.x = EM.x +1;
 EM.y = EM.y +1;
+
+TDtemp = RemoveNulls(TDtemp, (TDtemp.type == 1));
+
+others = RemoveNulls(TDtemp, (TDtemp.type < 4));
+
+
+
+
