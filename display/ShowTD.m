@@ -118,7 +118,7 @@ while (i<Tmax)
     title(TD.ts(i))
     axis off
     drawnow();
-    
+%     input(' ')
     t2 = t1 + FrameLength*Overlap;
     t1 = t1 + FrameLength;
     vid(k).cdata = Image;

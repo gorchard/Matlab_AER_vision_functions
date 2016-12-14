@@ -35,11 +35,11 @@ function [TD, EM] = ReadAER(filename)
 videoData = fopen(filename);
 temp = fread(videoData);
 fclose(videoData);
-TD.y = 1+ temp(4:4:end);
-TD.x = 1+ bitshift(bitand(temp(2:4:end),32),3)  + temp(3:4:end); %bit 5
-TD.p = bitshift(bitand(temp(2:4:end), 128), -7); %bit 7
-Type = bitshift(bitand(temp(2:4:end), 64), -6); %bit 6
-TD.ts = temp(1:4:end) + bitshift((bitand(temp(2:4:end), 31)), 8);% bit 4 downto 0
+TD.y = uint16(1+ temp(4:4:end));
+TD.x = uint16(1+ bitshift(bitand(temp(2:4:end),32),3)  + temp(3:4:end)); %bit 5
+TD.p = uint8(bitshift(bitand(temp(2:4:end), 128), -7)); %bit 7
+Type = uint8(bitshift(bitand(temp(2:4:end), 64), -6)); %bit 6
+TD.ts = uint32(temp(1:4:end) + bitshift((bitand(temp(2:4:end), 31)), 8));% bit 4 downto 0
 
 timeOffset = 0;
 for i = 1:length(TD.ts)

@@ -41,11 +41,11 @@ if nargin > 1 %if multiple arguments were passed
         loc = varargin{2};
         ROIsize = varargin{3};
         
+        %mark these events as invalid
+        invalidIndices = invalidIndices | (ROIevts.x < loc(1)) | (ROIevts.x > loc(1)+ ROIsize(1)) | (ROIevts.y < loc(2)) | (ROIevts.y > loc(2) + ROIsize(2)); 
+        
         ROIevts.x = ROIevts.x-loc(1) + 1; %shift to the ROI origin
         ROIevts.y = ROIevts.y-loc(2) + 1;
-        
-        %mark these events as invalid
-        invalidIndices = invalidIndices | (ROIevts.x <= 0) | (ROIevts.x > ROIsize(1)) | (ROIevts.y <= 0) | (ROIevts.y > ROIsize(2)); 
     end
 end
 

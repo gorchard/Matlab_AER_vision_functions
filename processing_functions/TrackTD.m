@@ -10,8 +10,10 @@ function [Tracker, C] = TrackTD(varargin)
 % 
 % If a tracker does not receive any events for a time of 'time_difference'
 % then the tracker is considered inactive
-
-
+%
+% Example: 
+% [Tracker, C] = TrackTD(TD, 100, 0.95, 100e3)
+%
 TD = varargin{1};
 DistSquared = varargin{2}.^2;
 StayingPower = varargin{3};
@@ -22,8 +24,8 @@ numActiveTrackers   = 0;
 C = zeros(1, length(TD.ts));
 i = 0;
 d = 0;
-while i <length(TD.ts)-10000        %loop through all events
-    for q = 1:10000
+while i <length(TD.ts)-100      %loop through all events
+    for q = 1:100
         i = i+1;
         for j = 1:numActiveTrackers             %calculate the distance of current event to each tracker
             d(j) = (TD.x(i) - Tracker{ActiveTrackers(j)}.x(TrackerIndex(ActiveTrackers(j)))).^2 + (TD.y(i) - Tracker{ActiveTrackers(j)}.y(TrackerIndex(ActiveTrackers(j)))).^2;

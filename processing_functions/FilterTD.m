@@ -31,15 +31,15 @@ X_prev = 0;
 Y_prev = 0;
 P_prev = 0;
 
-TDFiltered.x = zeros(size(TD.x));
-TDFiltered.y = zeros(size(TD.x));
-TDFiltered.p = zeros(size(TD.x));
-TDFiltered.ts = zeros(size(TD.x));
+TDFiltered.x = zeros(size(TD.x), 'uint16');
+TDFiltered.y = zeros(size(TD.x), 'uint16');
+TDFiltered.p = zeros(size(TD.x), 'uint8');
+TDFiltered.ts = zeros(size(TD.x), 'uint32');
 
 for i = 1:length(TD.ts)
     if X_prev ~= TD.x(i) || Y_prev ~= TD.y(i) || P_prev ~= TD.p(i)
         T0(TD.x(i), TD.y(i)) =  -inf;
-        T0temp = T0(max((TD.x(i)-1),1):min((TD.x(i)+1), 304), max((TD.y(i)-1), 1):min((TD.y(i)+1),240));
+        T0temp = uint32(T0(max((TD.x(i)-1),1):min((TD.x(i)+1), 304), max((TD.y(i)-1), 1):min((TD.y(i)+1),240)));
         T0temp = T0temp(:);
         [mi, loc] = min(TD.ts(i)-T0temp);
         if  mi < us_Time

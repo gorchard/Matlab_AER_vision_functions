@@ -91,8 +91,8 @@ thresh0Valid = zeros(max(EM.y),max(EM.x));
 TD.p = TD.p - min(TD.p) + 1;
 cc = hsv(length(unique(TD.p)));
 
-
-while (i<TmaxEM)
+Tmax = max([TmaxEM, length(TD.ts)]);
+while (i<Tmax)
     %% update background with APS data
     while ((EM.ts(i) < t1) && (i<TmaxEM))
         if (EM.p(i) == 0)
@@ -135,6 +135,6 @@ while (i<TmaxEM)
     axis off
     drawnow();
     t1 = t1 + FrameLength;
-    vid(k) = getframe;
+    vid(k).cdata = img;
     k = k+1;
 end

@@ -20,3 +20,6 @@ if length(varargin) > 1
     end
 end
 grid on
+xlabel('Pixel X address')
+ylabel('Pixel Y address')
+zlabel('Time (milliseconds)')

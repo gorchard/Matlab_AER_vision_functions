@@ -120,7 +120,3 @@ EM.y = EM.y +1;
 TDtemp = RemoveNulls(TDtemp, (TDtemp.type == 1));
 
 others = RemoveNulls(TDtemp, (TDtemp.type < 4));
-
-
-
-
