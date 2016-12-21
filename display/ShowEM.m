@@ -100,13 +100,18 @@ while (i<Tmax)
         minVal = 0;
         maxVal = 0;
     end
-        
+    img = -log(Image);
+    img(:,:,2) = -log(Image);
+    img(:,:,3) = -log(Image);
+    img(img<minVal) = minVal;
+    img(img>maxVal) = maxVal;
+    img = (img-minVal)./(maxVal-minVal);    
     
-    imshow(-log(Image), [minVal,maxVal], 'InitialMagnification', 'fit')
+    imshow(img, 'InitialMagnification', 'fit')
     axis off
 %     drawnow();
     
     t1 = t1 + FrameLength;
-    vid(k) = getframe;
+    vid(k).cdata = img;
     k = k+1;
 end

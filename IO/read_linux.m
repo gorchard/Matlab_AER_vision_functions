@@ -105,17 +105,20 @@ fclose(videoData);
 TDtemp = RemoveNulls(TDtemp, isinf(TDtemp.type));
 
 TD = RemoveNulls(TDtemp, (TDtemp.type ~= 0) & (TDtemp.type ~=3));
-TD.x = TD.x+1;
-TD.y = TD.y+1;
-TD.p = TD.p+1;
+TD.x = double(TD.x+1);
+TD.y = double(TD.y+1);
+TD.p = double(TD.p+1);
+TD.ts = double(TD.ts);
 
 % memory optimization
 TDtemp = RemoveNulls(TDtemp, (TDtemp.type ~= 0) & (TDtemp.type ==3));
 
 % memory optimization
 EM = RemoveNulls(TDtemp, (TDtemp.type ~= 1));
-EM.x = EM.x +1;
-EM.y = EM.y +1;
+EM.x = double(EM.x +1);
+EM.y = double(EM.y +1);
+EM.ts = double(EM.ts);
+EM.p = double(EM.p);
 
 TDtemp = RemoveNulls(TDtemp, (TDtemp.type == 1));
 

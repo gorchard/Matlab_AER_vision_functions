@@ -57,3 +57,13 @@ Type = Type(Type ~= 2);
 
 EM = RemoveNulls(TD, Type == 0);
 TD = RemoveNulls(TD, Type == 1);
+
+EM.x = double(EM.x);
+EM.y = double(EM.y);
+EM.p = double(EM.p);
+EM.ts = double(EM.ts);
+
+TD.x = double(TD.x);
+TD.y = double(TD.y);
+TD.p = double(TD.p);
+TD.ts = double(TD.ts);

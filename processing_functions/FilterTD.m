@@ -1,4 +1,4 @@
-function TDFiltered = FilterTD(TD, us_Time)
+function TD = FilterTD(TD, us_Time)
 % TDFiltered = FilterTD(TD, us_Time)
 %   A background activity filter.
 %   For each event, this function checks whether one of the 8 (vertical and
@@ -25,35 +25,28 @@ function TDFiltered = FilterTD(TD, us_Time)
 % written by Garrick Orchard - June 2014
 % garrickorchard@gmail.com
 
-j = 1;
-T0 = zeros(304,240)*-inf;
-X_prev = 0;
-Y_prev = 0;
-P_prev = 0;
+TD.x = TD.x+1;
+TD.y = TD.y+1;
+TD.ts = TD.ts+1+us_Time;
 
-TDFiltered.x = zeros(size(TD.x), 'uint16');
-TDFiltered.y = zeros(size(TD.x), 'uint16');
-TDFiltered.p = zeros(size(TD.x), 'uint8');
-TDFiltered.ts = zeros(size(TD.x), 'uint32');
+xmax = max(TD.x);
+ymax = max(TD.y);
+
+T0 = zeros(xmax+1,ymax+1);
 
 for i = 1:length(TD.ts)
-    if X_prev ~= TD.x(i) || Y_prev ~= TD.y(i) || P_prev ~= TD.p(i)
-        T0(TD.x(i), TD.y(i)) =  -inf;
-        T0temp = uint32(T0(max((TD.x(i)-1),1):min((TD.x(i)+1), 304), max((TD.y(i)-1), 1):min((TD.y(i)+1),240)));
-        T0temp = T0temp(:);
-        [mi, loc] = min(TD.ts(i)-T0temp);
-        if  mi < us_Time
-            TDFiltered.x(j) = TD.x(i);
-            TDFiltered.y(j) = TD.y(i);
-            TDFiltered.p(j) = TD.p(i);
-            TDFiltered.ts(j) = TD.ts(i);
-            j = j+1;
-        end
-        T0(TD.x(i), TD.y(i)) =  TD.ts(i);
-        X_prev = TD.x(i);
-        Y_prev = TD.y(i);
-        P_prev = TD.p(i);
+    T0(TD.x(i), TD.y(i)) =  0;
+    
+    T0temp = T0((TD.x(i)-1):(TD.x(i)+1), (TD.y(i)-1):(TD.y(i)+1));
+    T0(TD.x(i), TD.y(i)) =  TD.ts(i);
+    
+    if  TD.ts(i) >= max(T0temp(:)) + us_Time
+        TD.ts(i) = 0;
     end
+    
 end
 
-TDFiltered = RemoveNulls(TDFiltered, TDFiltered.x == 0);
+TD = RemoveNulls(TD, TD.ts == 0);
+TD.x = TD.x-1;
+TD.y = TD.y-1;
+TD.ts = TD.ts-1-us_Time;

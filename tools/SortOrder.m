@@ -15,6 +15,8 @@ end
 
 fieldnames = fields(result);
 for i = 1:length(fieldnames)
-    result.(fieldnames{i}) = result.(fieldnames{i})(order);
+    if ~strcmp(fieldnames{i}, 'meta')
+        result.(fieldnames{i}) = result.(fieldnames{i})(order);
+    end
 end
 
