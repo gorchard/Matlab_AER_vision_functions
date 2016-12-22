@@ -36,12 +36,36 @@ function [TD, EM, others] = read_linux(filename)
 %%
 videoData = fopen(filename);
 
-% skip through the header lines
-temp = '#';
-while ~isempty(temp)
-    temp = fgetl(videoData);
+%% is the first line a header or a version specifier?
+temp = fgetl(videoData);
+if temp(1) == '#'
+    file_version = 0;
     disp(temp)
+elseif temp(1) == 'v'
+    file_version = str2double(temp(2:end));
 end
+fprintf('File is version %i\n', file_version);
+
+%% skip through the rest of the comments
+first_char = '#';
+while first_char == '#'
+    temp = fgetl(videoData);
+    if ~isempty(temp)
+        first_char = temp(1);
+        disp(temp)
+    else
+        first_char = 0;
+    end
+end
+
+%% get the sensor resolution
+if file_version == 0
+    resolution = [304,240];
+else
+    resolution = [temp(1)+bitshift(temp(2), 8), temp(3)+bitshift(temp(4), 8)];
+end
+fprintf('Resolution is [%i, %i]\n', resolution(1), resolution(2));
+
 % start_offset = ftell(videoData);
 % 
 % total_events = 0;
@@ -73,6 +97,10 @@ while buffer_location < length(raw_data_buffer)
     num_events = bitshift(uint32(raw_data_buffer(buffer_location+3)), 24) + bitshift(uint32(raw_data_buffer(buffer_location+2)), 16) + bitshift(uint32(raw_data_buffer(buffer_location+1)), 8) + uint32(raw_data_buffer(buffer_location));
     buffer_location = buffer_location +4;
     start_time = bitshift(uint32(raw_data_buffer(buffer_location+3)), 24) + bitshift(uint32(raw_data_buffer(buffer_location+2)), 16) + bitshift(uint32(raw_data_buffer(buffer_location+1)), 8) + uint32(raw_data_buffer(buffer_location));
+    if file_version ~= 0
+        start_time = bitshift(start_time, 16);
+    end
+    
     buffer_location = buffer_location + 8; %skip the end_time
     
     type = raw_data_buffer(buffer_location:8:(buffer_location+8*(num_events-1)));
@@ -84,11 +112,13 @@ while buffer_location < length(raw_data_buffer)
     buffer_location = buffer_location + num_events*8;
     ts = ts + start_time;
     %packet_num = packet_num + 1;
-    overflows = find(type == 2);
-    for i = 1:length(overflows)
-        ts(overflows(i):end) = ts(overflows(i):end) + 65536;
+    if file_version == 0
+        overflows = find(type == 2);
+        for i = 1:length(overflows)
+            ts(overflows(i):end) = ts(overflows(i):end) + 65536;
+        end
     end
-         
+    
     TDtemp.type(total_events:(total_events+num_events-1)) = type;
     TDtemp.x(total_events:(total_events+num_events-1)) = x;
     TDtemp.y(total_events:(total_events+num_events-1)) = y;
