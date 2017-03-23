@@ -59,6 +59,7 @@ while first_char == '#'
 end
 
 %% get the sensor resolution
+temp = uint8(temp);
 if file_version == 0
     resolution = [304,240];
 else
