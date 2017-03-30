@@ -80,7 +80,7 @@ thresh0 = zeros(max(EM.y),max(EM.x));
 thresh0Valid = zeros(max(EM.y),max(EM.x));
 while (i<Tmax)
     while ((EM.ts(i) < t1) && (i<Tmax))
-        if (EM.p(i) == 0)
+        if (EM.p(i) <1)
             thresh0Valid(EM.y(i), EM.x(i))  = 1;
             thresh0(EM.y(i), EM.x(i))       = EM.ts(i);
         else
@@ -109,7 +109,7 @@ while (i<Tmax)
     
     imshow(img, 'InitialMagnification', 'fit')
     axis off
-%     drawnow();
+    drawnow();
     
     t1 = t1 + FrameLength;
     vid(k).cdata = img;

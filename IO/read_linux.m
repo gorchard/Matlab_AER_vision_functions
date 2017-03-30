@@ -47,26 +47,28 @@ end
 fprintf('File is version %i\n', file_version);
 
 %% skip through the rest of the comments
+temp = fgetl(videoData);
 first_char = '#';
 while first_char == '#'
+    disp(temp)
+    file_position = ftell(videoData); %remember the current position before reading in the new line
     temp = fgetl(videoData);
     if ~isempty(temp)
         first_char = temp(1);
-        disp(temp)
     else
         first_char = 0;
     end
 end
+fseek(videoData, file_position, 'bof'); %rewind back to the start of the first non-comment line
 
 %% get the sensor resolution
-temp = uint8(temp);
 if file_version == 0
     resolution = [304,240];
 else
-    resolution = [temp(1)+bitshift(temp(2), 8), temp(3)+bitshift(temp(4), 8)];
+    resolution = fread(videoData, 2, 'uint16');
 end
 fprintf('Resolution is [%i, %i]\n', resolution(1), resolution(2));
-
+fgetl(videoData);
 % start_offset = ftell(videoData);
 % 
 % total_events = 0;
@@ -106,7 +108,7 @@ while buffer_location < length(raw_data_buffer)
     
     type = raw_data_buffer(buffer_location:8:(buffer_location+8*(num_events-1)));
     subtype = raw_data_buffer((buffer_location+1):8:(buffer_location+8*(num_events)));
-    y = raw_data_buffer((buffer_location+2):8:(buffer_location+8*(num_events)+1));
+    y = uint16(raw_data_buffer((buffer_location+2):8:(buffer_location+8*(num_events)+1))) + 256*uint16(raw_data_buffer((buffer_location+3):8:(buffer_location+8*(num_events)+1)));
     x = bitshift(uint16(raw_data_buffer((buffer_location+5):8:(buffer_location+8*(num_events)+4))), 8) + uint16(raw_data_buffer((buffer_location+4):8:(buffer_location+8*(num_events)+3)));
     ts = bitshift(uint32(raw_data_buffer((buffer_location+7):8:(buffer_location+8*(num_events)+6))), 8) + uint32(raw_data_buffer((buffer_location+6):8:(buffer_location+8*(num_events)+5)));
     

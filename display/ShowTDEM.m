@@ -88,14 +88,18 @@ k=1;
 thresh0 = zeros(max(EM.y),max(EM.x));
 thresh0Valid = zeros(max(EM.y),max(EM.x));
 
-TD.p = TD.p - min(TD.p) + 1;
+[nums, ~, locs] = unique(TD.p);
+for i = 1:length(nums)
+    TD.p(locs==i) = i;
+end
+% TD.p = TD.p - min(TD.p) + 1;
 cc = hsv(length(unique(TD.p)));
 
 Tmax = max([TmaxEM, length(TD.ts)]);
 while (i<Tmax)
     %% update background with APS data
     while ((EM.ts(i) < t1) && (i<TmaxEM))
-        if (EM.p(i) == 0)
+        if (EM.p(i) < 1)
             thresh0Valid(EM.y(i), EM.x(i))  = 1;
             thresh0(EM.y(i), EM.x(i))       = EM.ts(i);
         else
@@ -126,7 +130,11 @@ while (i<Tmax)
     
     %% superimpose TD data
     while ((TD.ts(j) < t1) && (j<TmaxTD))
-        img(TD.y(j), TD.x(j), :) = cc(TD.p(j),:);
+        try
+            img(TD.y(j), TD.x(j), :) = cc(TD.p(j),:);
+        catch
+            keyboard
+        end
         j = j+1;
     end
     
@@ -136,5 +144,6 @@ while (i<Tmax)
     drawnow();
     t1 = t1 + FrameLength;
     vid(k).cdata = img;
+    vid(k).colormap = [];
     k = k+1;
 end
