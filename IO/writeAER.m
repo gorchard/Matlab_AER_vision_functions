@@ -43,10 +43,10 @@ end
 num_overflows = floor(AER.ts(end)/(2^13));
 
 %initialize a struct for overflow events
-ovf.ts = zeros(1,num_overflows);
+ovf.ts = ones(1,num_overflows)*8191;
 ovf.x = 306*ones(1,num_overflows);
 ovf.y = 241*ones(1,num_overflows);
-ovf.p = zeros(1,num_overflows);
+ovf.p = ones(1,num_overflows);
 ovf.Type = zeros(1,num_overflows);
 
 %find the overflow event locations
