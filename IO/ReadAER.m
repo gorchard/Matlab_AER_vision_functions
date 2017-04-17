@@ -35,19 +35,42 @@ function [TD, EM] = ReadAER(filename)
 videoData = fopen(filename);
 temp = fread(videoData);
 fclose(videoData);
-TD.y = uint16(1+ temp(4:4:end));
-TD.x = uint16(1+ bitshift(bitand(temp(2:4:end),32),3)  + temp(3:4:end)); %bit 5
-TD.p = uint8(bitshift(bitand(temp(2:4:end), 128), -7)); %bit 7
-Type = uint8(bitshift(bitand(temp(2:4:end), 64), -6)); %bit 6
-TD.ts = uint32(temp(1:4:end) + bitshift((bitand(temp(2:4:end), 31)), 8));% bit 4 downto 0
+if sum(abs(temp(1:6)'-double(sprintf('winv2\n')))) == 0
+    fprintf('Windows file version 2 detected')
+    temp(1:6) = []; %remove comment
+    
+    TD.p = uint8(temp(1:8:end)); %bit 7
+    Type = uint8(temp(2:8:end)); %bit 6
+    TD.y = 1+  uint16(bitshift(temp(4:8:end),8) + temp(3:8:end));
+    TD.x = 1+  uint16(bitshift(temp(6:8:end),8) + temp(5:8:end));
+    TD.ts = uint32(bitshift(temp(8:8:end),8) + temp(7:8:end));
+    
+    timeOffset = 0;
+    for i = 1:length(TD.ts)
+        if (Type(i) == 2)
+            timeOffset = timeOffset + 2^16;
+        else
+            TD.ts(i) = TD.ts(i) + timeOffset;
+        end
+    end
+    
+else
+    fprintf('Windows file version 1 detected')
+    
+    TD.y = uint16(1+ temp(4:4:end));
+    TD.x = uint16(1+ bitshift(bitand(temp(2:4:end),32),3)  + temp(3:4:end)); %bit 5
+    TD.p = uint8(bitshift(bitand(temp(2:4:end), 128), -7)); %bit 7
+    Type = uint8(bitshift(bitand(temp(2:4:end), 64), -6)); %bit 6
+    TD.ts = uint32(temp(1:4:end) + bitshift((bitand(temp(2:4:end), 31)), 8));% bit 4 downto 0
 
-timeOffset = 0;
-for i = 1:length(TD.ts)
-    if ((TD.y(i) == 241) && (TD.x(i) ==306))
-        Type(i) = 2;
-        timeOffset = timeOffset + 2^13;
-    else
-        TD.ts(i) = TD.ts(i) + timeOffset;
+    timeOffset = 0;
+    for i = 1:length(TD.ts)
+        if ((TD.y(i) == 241) && (TD.x(i) ==306))
+            Type(i) = 2;
+            timeOffset = timeOffset + 2^13;
+        else
+            TD.ts(i) = TD.ts(i) + timeOffset;
+        end
     end
 end
 
