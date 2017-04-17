@@ -19,21 +19,43 @@ function [comments, dimensions] = read_linux_header(filename)
 %%
 videoData = fopen(filename);
 
-% skip through the header lines
+%% is the first line a header or a version specifier?
 temp = fgetl(videoData);
 comments = [];
-dimensions = [];
-while ~isempty(temp)
-    if temp(1) == '#'
-        comments = [comments, temp];
-        temp = fgetl(videoData);
+
+if temp(1) == '#'
+    file_version = 0;
+    comments = temp;
+elseif temp(1) == 'v'
+    file_version = str2double(temp(2:end));
+end
+%fprintf('File is version %i\n', file_version);
+
+%% skip through the rest of the comments
+file_position = ftell(videoData); %remember the current position before reading in the new line
+isContinue = 1;
+while isContinue
+    temp = fgetl(videoData);
+    if isempty(temp)
+        isContinue = 0;
+        file_position = ftell(videoData); %remember the current position before reading in the new line
+    elseif temp(1) == '#'
+        if isempty(comments)
+            comments = temp;
+        else
+            comments = strcat(comments, 10, temp);
+        end
+        file_position = ftell(videoData); %remember the current position before reading in the new line
     else
-        dimensions = temp;
-        temp = [];
+        isContinue = 0;
     end
 end
+fseek(videoData, file_position, 'bof'); %rewind back to the start of the first non-comment line
 
-if isempty(dimensions)
-    fprintf('No dimensions in input file, resorting to ATIS default of [304 x 240]');
-    dimensions = [304, 240]; %default to ATIS dimensions since all recordings before including dimensions were with ATIS
+%% get the sensor resolution
+if file_version == 0
+    dimensions = [304,240];
+else
+    dimensions = fread(videoData, 2, 'uint16');
+    fgetl(videoData);
 end
