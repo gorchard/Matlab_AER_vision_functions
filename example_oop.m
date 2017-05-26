@@ -67,7 +67,7 @@ tdRoi = tdCropped.clone();
 isNormalize = 1;
 tdRoi.extract_roi(250, 1, 50, 50, isNormalize);
 % extract events occurring between 1 and 2 seconds
-tdRoid.extract_time(1e6, 2e6);
+tdRoi.extract_time(1e6, 2e6);
 
 %Show the result 10x slowed down and make it into a movie
 video = tdRoi.show(1/(24*10)); %a regular video would have 1/24 seconds worth of data per frame. We want 1/24 * 1/10 seconds of data per frame
