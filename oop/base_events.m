@@ -900,11 +900,19 @@ classdef base_events < handle
                 for i = 1:numImages
                     endImageTs = double(minTs + i * 1000);
                     endAnnotationIdx = find(tgtAnnotation.ts > endImageTs, 1, 'first');
-                    endAnnotationTs = tgtAnnotation.ts(endAnnotationIdx);
-                    endAnnotationPosX = tgtAnnotation.x(endAnnotationIdx); % centre of annotation
-                    endAnnotationPosY = tgtAnnotation.y(endAnnotationIdx); % centre of annotation
-                    endAnnotationSizeX = tgtAnnotation.xSize(endAnnotationIdx); % size of annotation
-                    endAnnotationSizeY = tgtAnnotation.ySize(endAnnotationIdx); % size of annotation
+                    if isempty(endAnnotationIdx)
+                        endAnnotationTs = tgtAnnotation.ts(end);
+                        endAnnotationPosX = tgtAnnotation.x(end); % centre of annotation
+                        endAnnotationPosY = tgtAnnotation.y(end); % centre of annotation
+                        endAnnotationSizeX = tgtAnnotation.xSize(end); % size of annotation
+                        endAnnotationSizeY = tgtAnnotation.ySize(end); % size of annotation
+                    else
+                        endAnnotationTs = tgtAnnotation.ts(endAnnotationIdx);
+                        endAnnotationPosX = tgtAnnotation.x(endAnnotationIdx); % centre of annotation
+                        endAnnotationPosY = tgtAnnotation.y(endAnnotationIdx); % centre of annotation
+                        endAnnotationSizeX = tgtAnnotation.xSize(endAnnotationIdx); % size of annotation
+                        endAnnotationSizeY = tgtAnnotation.ySize(endAnnotationIdx); % size of annotation
+                    end
                     
                     startImageTs = endImageTs - 1000;
                     startAnnotationIdx = find(tgtAnnotation.ts <= startImageTs, 1, 'last');
@@ -975,10 +983,16 @@ classdef base_events < handle
                 for i = 1:numImages
                     endImageTs = double(minTs + i * 1000);
                     endAnnotationIdx = find(tgtAnnotation.ts > endImageTs, 1, 'first');
-                    endAnnotationTs = tgtAnnotation.ts(endAnnotationIdx);
-                    endAnnotationPosX = tgtAnnotation.x(endAnnotationIdx); % centre of annotation
-                    endAnnotationPosY = tgtAnnotation.y(endAnnotationIdx); % centre of annotation
-                    
+                    if isempty(endAnnotationIdx)
+                        endAnnotationTs = tgtAnnotation.ts(end);
+                        endAnnotationPosX = tgtAnnotation.x(end); % centre of annotation
+                        endAnnotationPosY = tgtAnnotation.y(end); % centre of annotation
+                    else
+                        endAnnotationTs = tgtAnnotation.ts(endAnnotationIdx);
+                        endAnnotationPosX = tgtAnnotation.x(endAnnotationIdx); % centre of annotation
+                        endAnnotationPosY = tgtAnnotation.y(endAnnotationIdx); % centre of annotation
+                    end
+                                        
                     startImageTs = endImageTs - 1000;
                     startAnnotationIdx = find(tgtAnnotation.ts <= startImageTs, 1, 'last');
                     startAnnotationTs = tgtAnnotation.ts(startAnnotationIdx);
