@@ -150,7 +150,7 @@ classdef base_events < handle
                 clear raw_data_buffer type x y subtype ts
             catch e
                 clear raw_data_buffer type x y subtype ts
-                rethrow e;
+                rethrow(e);
             end
             
             fclose(videoData);
@@ -262,19 +262,19 @@ classdef base_events < handle
             
         end
         
-%         function [td, em, others] = read_annotated_td(annotationFilename, datasetDirectory)
-%             anno = annotation(annotationFilename);
-%                         
-%             if datasetDirectory(end) == '\' || datasetDirectory(end) == '/'
-%                 tdFileName = strcat(datasetDirectory, anno.meta.source);
-%             else
-%                 tdFileName = strcat(datasetDirectory, '/', anno.meta.source);
-%             end
-%             tdFileName = strrep(tdFileName, '\', '/');
-%             [td, em, others] = base_events.read_linux(tdFileName);
-%             em.annotation = anno;
-%             td.annotation = anno;
-%         end
+        %         function [td, em, others] = read_annotated_td(annotationFilename, datasetDirectory)
+        %             anno = annotation(annotationFilename);
+        %
+        %             if datasetDirectory(end) == '\' || datasetDirectory(end) == '/'
+        %                 tdFileName = strcat(datasetDirectory, anno.meta.source);
+        %             else
+        %                 tdFileName = strcat(datasetDirectory, '/', anno.meta.source);
+        %             end
+        %             tdFileName = strrep(tdFileName, '\', '/');
+        %             [td, em, others] = base_events.read_linux(tdFileName);
+        %             em.annotation = anno;
+        %             td.annotation = anno;
+        %         end
     end
     
     methods(Access = public)
@@ -303,11 +303,11 @@ classdef base_events < handle
         
         function preallocate(evt, numberToAdd)
             %pre-allocate additional space for new data
-            newSpace = zeros(numberToAdd, 1);
-            evt.x = [evt.x; newSpace];
-            evt.y = [evt.y; newSpace];
-            evt.p = [evt.p; newSpace];
-            evt.ts = [evt.ts; newSpace];
+            newSpace = zeros(1, numberToAdd);
+            evt.x = [evt.x newSpace];
+            evt.y = [evt.y newSpace];
+            evt.p = [evt.p newSpace];
+            evt.ts = [evt.ts newSpace];
         end
         
         function trim(evt)
@@ -336,6 +336,8 @@ classdef base_events < handle
             evt.p((startIdx):(endIdx)) = eventsToAdd.p;
             evt.ts((startIdx):(endIdx)) = eventsToAdd.ts;
             evt.actualSize = endIdx;
+            evt.width = max(evt.width, eventsToAdd.width);
+            evt.height= max(evt.width, eventsToAdd.height);
         end
         
         function filter(evt, usTime)
@@ -878,6 +880,39 @@ classdef base_events < handle
             end
         end
         
+        function frames = show_channel(td, frameDuration, isDisplay, saveFileName, channel)
+            %frameDuration microseconds of data to use in each frame
+            close all;
+            
+            numFrames = ceil((td.ts(end) - td.ts(1) + 1) / frameDuration);
+            frames = zeros(td.height, td.width, 1, numFrames, 'uint8');
+            tempTs = td.ts - td.ts(1) + 1;
+            frameIdx = ceil(tempTs / frameDuration);
+            colours = zeros(numel(td.ts), 1, 'uint8');
+            colours(td.p == channel) = 255;
+            
+            for i = 1:numel(tempTs)
+                frames(td.y(i), td.x(i), 1, frameIdx(i)) = colours(i);
+            end
+            
+            if exist('saveFileName', 'var') && ~isempty(saveFileName)
+                writerObj = VideoWriter(saveFileName, 'Grayscale AVI');
+                writerObj.FrameRate = 30;
+                open(writerObj);
+                writeVideo(writerObj, frames);
+                close(writerObj);
+            end
+            
+            if (isDisplay)
+                for i = 1:numFrames
+                    imshow(frames(:, :, :, i), 'InitialMagnification', 300);
+                    title(sprintf('%03.3fms', i*frameDuration / 1000));
+                    axis off
+                    drawnow();
+                end
+            end
+        end
+        
         function [track, msFrames] = extract_track(evt, trackNum, xBuffer, yBuffer)
             % creates 1) a new td that contains only the events from  the tracker number
             % 2) 1ms frames of the annotated events. Each frame may be a
@@ -922,7 +957,11 @@ classdef base_events < handle
                     startAnnotationSizeX = tgtAnnotation.xSize(startAnnotationIdx); % size of annotation
                     startAnnotationSizeY = tgtAnnotation.ySize(startAnnotationIdx); % size of annotation
                     
-                    timeFactor = (endImageTs - startAnnotationTs) / (endAnnotationTs - startAnnotationTs);
+                    if endAnnotationTs == startAnnotationTs
+                        timeFactor = 1;
+                    else
+                        timeFactor = (endImageTs - startAnnotationTs) / (endAnnotationTs - startAnnotationTs);
+                    end
                     posX = startAnnotationPosX +  timeFactor*(endAnnotationPosX-startAnnotationPosX); % centre of annotation
                     posY = startAnnotationPosY +  timeFactor*(endAnnotationPosY-startAnnotationPosY); % centre of annotation
                     thresholdX = (startAnnotationSizeX + timeFactor*(endAnnotationSizeX-startAnnotationSizeX)) / 2 + xBuffer; % half size of annotation
@@ -931,6 +970,7 @@ classdef base_events < handle
                     % generate the 1ms frame
                     frameHeight = ceil(thresholdY * 2);
                     frameWidth = ceil(thresholdX * 2);
+                    try
                     frame = zeros(frameHeight, frameWidth, 'single');
                     while eventIdx <= numel(track.ts) && track.ts(eventIdx) < endImageTs
                         relativeX = track.x(eventIdx) - posX;
@@ -941,12 +981,17 @@ classdef base_events < handle
                             if (translatedY > 0) && (translatedX > 0) && (translatedY <= frameHeight) && (translatedX <= frameWidth)
                                 frame(translatedY, translatedX) = 1;
                                 isOutsideAnnotationBoundary(eventIdx) = 0;
+                                track.x(eventIdx) = translatedX;
+                                track.y(eventIdx) = translatedY;
                             end
                         end
                         
                         eventIdx = eventIdx + 1;
                     end
-                    
+                    catch e
+                        keyboard;
+                        rethrow(e);
+                    end
                     msFrames{i} = frame;
                 end
                 
@@ -992,14 +1037,18 @@ classdef base_events < handle
                         endAnnotationPosX = tgtAnnotation.x(endAnnotationIdx); % centre of annotation
                         endAnnotationPosY = tgtAnnotation.y(endAnnotationIdx); % centre of annotation
                     end
-                                        
+                    
                     startImageTs = endImageTs - 1000;
                     startAnnotationIdx = find(tgtAnnotation.ts <= startImageTs, 1, 'last');
                     startAnnotationTs = tgtAnnotation.ts(startAnnotationIdx);
                     startAnnotationPosX = tgtAnnotation.x(startAnnotationIdx); % centre of annotation
                     startAnnotationPosY = tgtAnnotation.y(startAnnotationIdx); % centre of annotation
                     
-                    timeFactor = (endImageTs - startAnnotationTs) / (endAnnotationTs - startAnnotationTs);
+                    if endAnnotationTs == startAnnotationTs
+                        timeFactor = 1;
+                    else
+                        timeFactor = (endImageTs - startAnnotationTs) / (endAnnotationTs - startAnnotationTs);
+                    end
                     posX = startAnnotationPosX +  timeFactor*(endAnnotationPosX-startAnnotationPosX); % centre of annotation
                     posY = startAnnotationPosY +  timeFactor*(endAnnotationPosY-startAnnotationPosY); % centre of annotation
                     
@@ -1104,7 +1153,7 @@ classdef base_events < handle
             writeEvents.x = double(evt.x-1);
             writeEvents.y = double(evt.y-1);
             writeEvents.type = zeros(1,length(evt.ts));
-            writeEvents.subtype = evt.p;
+            writeEvents.subtype = evt.p-1;
             writeEvents.ts = evt.ts;
             
             %             writeEvents = CombineStreams(writeEvents, overflowEvents);
@@ -1162,6 +1211,15 @@ classdef base_events < handle
             end
             
             fclose(outputFile);
+        end
+        
+        function combine_td(evt, evt2)
+            evt.concatenate(evt2);
+            [evt.ts, sortOrder] = sort(evt.ts);
+            evt.x = evt.x(sortOrder);
+            evt.y = evt.y(sortOrder);
+            evt.p = evt.p(sortOrder);
+            
         end
     end
     
