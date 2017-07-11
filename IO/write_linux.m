@@ -30,7 +30,7 @@ function write_linux(td, filename, ~)
 outputFile = fopen(filename, 'w');
 
 %write version header
-fwrite(outputFile, 'v2\n');
+fprintf(outputFile, 'v2\n');
 %write a short header
 fprintf(outputFile, '#Event file for linux_aer created using Matlab function "write_linux" at time %s \n', datestr(now));
 %write the resolution of these events, followed by a newline
