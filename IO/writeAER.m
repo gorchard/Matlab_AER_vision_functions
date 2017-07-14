@@ -43,17 +43,17 @@ end
 num_overflows = floor(AER.ts(end)/(2^13));
 
 %initialize a struct for overflow events
-ovf.ts = ones(1,num_overflows)*8191;
+ovf.ts = [1:num_overflows] .* 8192 - 1;
 ovf.x = 306*ones(1,num_overflows);
 ovf.y = 241*ones(1,num_overflows);
 ovf.p = ones(1,num_overflows);
 ovf.Type = zeros(1,num_overflows);
 
 %find the overflow event locations
-for overflow_counter = 1:num_overflows
-    overflow_index = find(AER.ts>=(2^13)*overflow_counter, 1);
-    ovf.ts(overflow_counter) = AER.ts(overflow_index)-0.5;
-end
+% for overflow_counter = 1:num_overflows
+%     overflow_index = find(AER.ts>=(2^13)*overflow_counter, 1);
+%     ovf.ts(overflow_counter) = AER.ts(overflow_index)-0.5;
+% end
 
 %combine the overflow events with the other AER events
 AER = CombineStreams(AER, ovf);

@@ -25,18 +25,21 @@ classdef annotation < handle
                 recording = fgetl(fileID); %for the newline character etc
                 recording = strrep(recording, '\', filesep);
                 recording = strrep(recording, '/', filesep);
-                picture = fscanf(fileID, '#The corresponding picture of the recording site is at: %s');
+                fscanf(fileID, '#The corresponding picture of the recording site is at: ');
+                picture = fgetl(fileID); % for the newline character etc
                 picture = strrep(picture, '\', filesep);
                 picture = strrep(picture, '/', filesep);
-                fgets(fileID); %for the newline character etc
-                filepath = fscanf(fileID, '#The annotation file is stored at: %s');
+%                 fgets(fileID); %for the newline character etc
+                filepath = fscanf(fileID, '#The annotation file is stored at: ');
+                filepath = fgetl(fileID);
                 filepath = strrep(filepath, '\', filesep);
                 filepath = strrep(filepath, '/', filesep);
-                fgets(fileID); %for the newline character etc
+%                 fgets(fileID); %for the newline character etc
                 fscanf(fileID,'#Comments: ');
                 comments = fgetl(fileID); %for the newline character etc
-                annotator = fscanf(fileID,'#The recordings are annotated by: %s');
-                fgets(fileID); %for the newline character etc
+                annotator = fscanf(fileID,'#The recordings are annotated by: ');
+                annotator = fgetl(fileID);
+%                 fgets(fileID); %for the newline character etc
                 sensorDimension = fscanf(fileID,'#Sensor Dimensions- Height = %d Pixels Width = %d Pixels');
                 fgets(fileID); %for the newline character etc
                 fscanf(fileID, '#LEGEND: ');
