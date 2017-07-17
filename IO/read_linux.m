@@ -40,7 +40,7 @@ videoData = fopen(filename);
 temp = fgetl(videoData);
 if temp(1) == '#'
     file_version = 0;
-    disp(temp)
+%     disp(temp)
 elseif temp(1) == 'v'
     file_version = str2double(temp(2:end));
 end
@@ -70,7 +70,7 @@ else
     resolution = fread(videoData, 2, 'uint16');
     fgetl(videoData);
 end
-fprintf('Resolution is [%i, %i]\n', resolution(1), resolution(2));
+% fprintf('Resolution is [%i, %i]\n', resolution(1), resolution(2));
 %fgetl(videoData);
 % start_offset = ftell(videoData);
 %
@@ -138,9 +138,10 @@ end
 clear raw_data_buffer type x y subtype ts
 
 fclose(videoData);
+TDtemp = SortOrder(TDtemp);
 
 TDtemp = RemoveNulls(TDtemp, isinf(TDtemp.type));
-
+% TD = TDtemp;
 TD = RemoveNulls(TDtemp, (TDtemp.type ~= 0) & (TDtemp.type ~=3));
 TD.x = double(TD.x+1);
 TD.y = double(TD.y+1);
