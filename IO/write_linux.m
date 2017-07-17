@@ -90,7 +90,7 @@ while numEventsRemaining >0
     buffer(6:8:end) = bitshift(writeEvents.x(eventIdx:endIdx), -8);
     buffer(7:8:end) = bitand(writeEvents.ts(eventIdx:endIdx), 255, 'int32');
     try
-        buffer(8:8:end) = bitand(bitshift(writeEvents.ts(eventIdx:endIdx), -8), 255, 'int32');
+        buffer(8:8:end) = bitand(bitshift(writeEvents.ts(eventIdx:endIdx), -8), 255, 'uint32');
     catch e
         rethrow(e);
     end
