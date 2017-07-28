@@ -78,8 +78,8 @@ end
 TD = RemoveNulls(TD, Type == 2);
 Type = Type(Type ~= 2);
 
-EM = RemoveNulls(TD, Type == 0);
-TD = RemoveNulls(TD, Type == 1);
+EM = RemoveNulls(TD, Type ~= 1);
+TD = RemoveNulls(TD, Type ~= 0);
 
 EM.x = double(EM.x);
 EM.y = double(EM.y);
