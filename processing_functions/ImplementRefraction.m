@@ -35,7 +35,8 @@
 % garrickorchard@gmail.com
 
 function TD = ImplementRefraction(TD, Refrac_time, Mutual_Refraction)
-TD.ts = TD.ts + Refrac_time;
+min_time = min(TD.ts);
+TD.ts = TD.ts + Refrac_time + 1 - min_time;
 
 if ~exist('Mutual_Refraction', 'var')
     Mutual_Refraction = 1;
@@ -67,4 +68,4 @@ else
     TD = RemoveNulls(TD, TD.ts == 0);
 end
 
-TD.ts = TD.ts - Refrac_time;
+TD.ts = TD.ts - Refrac_time - 1 + min_time;
