@@ -36,7 +36,7 @@ videoData = fopen(filename);
 temp = fread(videoData);
 fclose(videoData);
 if sum(abs(temp(1:6)'-double(sprintf('winv2\n')))) == 0
-    fprintf('Windows file version 2 detected')
+    fprintf('Windows file version 2 detected\n')
     temp(1:6) = []; %remove comment
     
     TD.p = uint8(temp(1:8:end)); %bit 7
@@ -78,8 +78,8 @@ end
 TD = RemoveNulls(TD, Type == 2);
 Type = Type(Type ~= 2);
 
-EM = RemoveNulls(TD, Type == 0);
-TD = RemoveNulls(TD, Type == 1);
+EM = RemoveNulls(TD, Type ~= 1);
+TD = RemoveNulls(TD, Type ~= 0);
 
 EM.x = double(EM.x);
 EM.y = double(EM.y);
