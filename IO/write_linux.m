@@ -58,6 +58,9 @@ numEventsRemaining = length(writeEvents.ts);
 %writeEvents.ts = rem(writeEvents.ts, 2^16);
 packet_type = 1; %% TD_EM_Format
 
+%% To rectify any ordering issues for event Timestamps;
+writeEvents = SortOrder(writeEvents);
+
 eventIdx = 1;
 while numEventsRemaining >0
     startTime = bitshift(writeEvents.ts(eventIdx), -16);

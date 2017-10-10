@@ -138,6 +138,7 @@ end
 clear raw_data_buffer type x y subtype ts
 
 fclose(videoData);
+TDtemp = SortOrder(TDtemp);
 
 TDtemp = RemoveNulls(TDtemp, isinf(TDtemp.type));
 
