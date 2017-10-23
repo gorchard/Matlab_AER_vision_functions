@@ -305,7 +305,7 @@ classdef annotation < handle
         function numPoints = count_points(annotation)
             numPoints = sum(arrayfun(@(x) numel(x.points), annotation.tracks));
         end
-        
+                
         function [bounding_boxes, trackIDs] = get_all_bounding_boxes(annotation, time_point)
             invalid_indices = zeros(1,length(annotation.tracks));
             trackIDs = 1:length(annotation.tracks);
