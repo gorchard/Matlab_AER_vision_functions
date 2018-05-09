@@ -109,30 +109,33 @@ while buffer_location < length(raw_data_buffer)
     end
     
     buffer_location = buffer_location + 8; %skip the end_time
-    
-    type = raw_data_buffer(buffer_location:8:(buffer_location+8*(num_events-1)));
-    subtype = raw_data_buffer((buffer_location+1):8:(buffer_location+8*(num_events)));
-    y = uint16(raw_data_buffer((buffer_location+2):8:(buffer_location+8*(num_events)+1))) + 256*uint16(raw_data_buffer((buffer_location+3):8:(buffer_location+8*(num_events)+1)));
-    x = bitshift(uint16(raw_data_buffer((buffer_location+5):8:(buffer_location+8*(num_events)+4))), 8) + uint16(raw_data_buffer((buffer_location+4):8:(buffer_location+8*(num_events)+3)));
-    ts = bitshift(uint32(raw_data_buffer((buffer_location+7):8:(buffer_location+8*(num_events)+6))), 8) + uint32(raw_data_buffer((buffer_location+6):8:(buffer_location+8*(num_events)+5)));
-    
-    buffer_location = buffer_location + num_events*8;
-    ts = ts + start_time;
-    %packet_num = packet_num + 1;
-    if file_version == 0
-        overflows = find(type == 2);
-        for i = 1:length(overflows)
-            ts(overflows(i):end) = ts(overflows(i):end) + 65536;
+    if length(raw_data_buffer) >= buffer_location + 8*num_events-1 
+        type = raw_data_buffer(buffer_location:8:(buffer_location+8*(num_events-1)));
+        subtype = raw_data_buffer((buffer_location+1):8:(buffer_location+8*(num_events)));
+        y = uint16(raw_data_buffer((buffer_location+2):8:(buffer_location+8*(num_events)+1))) + 256*uint16(raw_data_buffer((buffer_location+3):8:(buffer_location+8*(num_events)+1)));
+        x = bitshift(uint16(raw_data_buffer((buffer_location+5):8:(buffer_location+8*(num_events)+4))), 8) + uint16(raw_data_buffer((buffer_location+4):8:(buffer_location+8*(num_events)+3)));
+        ts = bitshift(uint32(raw_data_buffer((buffer_location+7):8:(buffer_location+8*(num_events)+6))), 8) + uint32(raw_data_buffer((buffer_location+6):8:(buffer_location+8*(num_events)+5)));
+
+        buffer_location = buffer_location + num_events*8;
+        ts = ts + start_time;
+        %packet_num = packet_num + 1;
+        if file_version == 0
+            overflows = find(type == 2);
+            for i = 1:length(overflows)
+                ts(overflows(i):end) = ts(overflows(i):end) + 65536;
+            end
         end
+
+        TDtemp.type(total_events:(total_events+num_events-1)) = type;
+        TDtemp.x(total_events:(total_events+num_events-1)) = x;
+        TDtemp.y(total_events:(total_events+num_events-1)) = y;
+        TDtemp.p(total_events:(total_events+num_events-1)) = subtype;
+        TDtemp.ts(total_events:(total_events+num_events-1)) = ts;
+        %TDtemp.f(total_events:(total_events+num_events-1)) = type;
+        total_events = total_events + num_events;
+    else
+        buffer_location = length(raw_data_buffer);
     end
-    
-    TDtemp.type(total_events:(total_events+num_events-1)) = type;
-    TDtemp.x(total_events:(total_events+num_events-1)) = x;
-    TDtemp.y(total_events:(total_events+num_events-1)) = y;
-    TDtemp.p(total_events:(total_events+num_events-1)) = subtype;
-    TDtemp.ts(total_events:(total_events+num_events-1)) = ts;
-    %TDtemp.f(total_events:(total_events+num_events-1)) = type;
-    total_events = total_events + num_events;
 end
 
 clear raw_data_buffer type x y subtype ts
